@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css">
+    <link rel="stylesheet" type="text/css" href="/style.ff1c4cab.css">
+  
+<script src="/style.ff1c4cab.js"></script></head>
+<body>
+    <header class="ui secondary pointing menu">
+        <a class="active item">
+          Weekly Expenses
+        </a>
+        <a class="item">
+          Savings Vizualized
+        </a>
+        <div class="right menu">
+          <a class="ui item">
+            Logout
+          </a>
+          <a class="ui item">
+            Login
+          </a>
+        </div>
+      </header>
+
+      <table id="table" class="ui celled table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Description</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- <tr class="positive">
+            <td>Income</td>
+            <td>Weekly Salary</td>
+            <td>
+              +$800
+            </td>
+          </tr>
+        -->
+        </tbody>
+        <tfoot class="full-width">
+            <tr>
+                <form id="submit-form">
+                <th>
+                     <div class="ui form">
+                        <div class="field">
+                          <select id="type">
+                            <option value="income">income</option>
+                            <option value="expense">expense</option>
+                          </select>
+                        </div>
+                    </div>
+                </th>
+              <th>
+                <div class="ui form">
+                      <div class="field">
+                        <input id="description" placeholder="Description" type="text">
+                    </div>
+                  </div>
+              </th>
+              <th class="relative">
+                <div class="ui form left floated">
+                    <div class="six wide field">
+                      <input id="amount" type="number" placeholder="Amount">
+                  </div>
+                </div>
+                <button class="submit-button positive ui button" type="submit">Add</button>
+              </th>
+               </form>
+            </tr>
+          </tfoot>
+      
+      </table>
+  
+
+<script src="/js.00a46daa.js"></script>
+   
+</body>
+</html>

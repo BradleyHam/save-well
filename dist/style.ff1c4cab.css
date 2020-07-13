@@ -1,0 +1,11 @@
+.relative {
+  position: relative; }
+
+.submit-button, .row-button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%); }
+
+
+/*# sourceMappingURL=/style.ff1c4cab.css.map */
