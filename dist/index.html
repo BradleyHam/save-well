@@ -26,6 +26,18 @@
         </div>
       </header>
 
+      <div class="ui statistic green">
+        <div class="label">
+          Total
+        </div>
+        <div id="total" class="value">
+         
+        </div>
+      </div>
+
+  
+     
+
       <table id="table" class="ui celled table">
         <thead>
           <tr>
@@ -61,6 +73,9 @@
                 <div class="ui form">
                       <div class="field">
                         <input id="description" placeholder="Description" type="text">
+                        <div class="ui error message">
+                          <p>Enter a value</p>
+                        </div>
                     </div>
                   </div>
               </th>
@@ -68,6 +83,9 @@
                 <div class="ui form left floated">
                     <div class="six wide field">
                       <input id="amount" type="number" placeholder="Amount">
+                      <div class="ui error message">
+                        <p>Enter a value</p>
+                      </div>
                   </div>
                 </div>
                 <button class="submit-button positive ui button" type="submit">Add</button>
@@ -77,7 +95,8 @@
           </tfoot>
       
       </table>
-  
+
+   
 
 <script src="/js.00a46daa.js"></script>
    

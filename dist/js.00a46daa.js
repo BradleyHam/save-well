@@ -117,7 +117,9 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"js/view/dom-elements.js":[function(require,module,exports) {
+})({"js/startApplication.js":[function(require,module,exports) {
+
+},{}],"js/view/dom-elements.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -130,7 +132,8 @@ var _default = {
   description: document.getElementById('description'),
   amount: document.getElementById('amount'),
   tableBody: document.getElementById('table-body'),
-  table: document.getElementById('table')
+  table: document.getElementById('table'),
+  total: document.getElementById('total')
 };
 exports.default = _default;
 },{}],"js/model/table-model.js":[function(require,module,exports) {
@@ -162,8 +165,9 @@ var TableRow = /*#__PURE__*/function () {
 
   _createClass(TableRow, [{
     key: "appendRow",
-    value: function appendRow() {
-      var rowMarkup = "\n      <tr class=\" ".concat(this.type === 'expense' ? 'negative' : 'positive', "\">\n        <td>").concat(this.type, "</td>\n        <td>").concat(this.description, "</td>\n        <td class=\"relative\">\n        ").concat(this.amount, "\n        <button class='remove-button row-button ui button red'>remove</button>\n        </td>\n      </tr>\n    ");
+    value: function appendRow(state) {
+      var rowMarkup = "\n      <tr data-id=".concat((Math.random() * 1000000000000).toFixed(), " class=\" ").concat(this.type === 'expense' ? 'negative' : 'positive', "\">\n        <td>").concat(this.type, "</td>\n        <td>").concat(this.description, "</td>\n        <td class=\"relative\">\n          <span class=\"amount\">").concat(this.type === 'income' ? '+' : '-', " $").concat(new Intl.NumberFormat().format(this.amount), "</span>\n        <button class='remove-button row-button ui button red'>remove</button>\n        </td>\n      </tr>\n    ");
+      state.markUp.push(rowMarkup);
 
       _domElements.default.tableBody.insertAdjacentHTML('beforeend', rowMarkup);
     }
@@ -182,7 +186,43 @@ var _tableModel = _interopRequireDefault(require("../model/table-model"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function addRemoveFeature() {
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+var appState = JSON.parse(localStorage.getItem('state'));
+var state = {
+  markUp: []
+};
+
+function saveLocalStorage(obj) {
+  localStorage.setItem('state', JSON.stringify(obj));
+}
+
+function updateTotal() {
+  var amountElements = document.querySelectorAll('.amount');
+  var amounts = Array.from(amountElements).map(function (el) {
+    return el.innerText;
+  });
+  var total = amounts.reduce(function (acc, cur) {
+    var curNumber = +cur.replace(',', '').slice(3);
+    console.log(curNumber);
+
+    if (cur.startsWith('+')) {
+      return acc + curNumber;
+    }
+
+    return acc - curNumber;
+  }, 0);
+  _domElements.default.total.innerText = "$".concat(new Intl.NumberFormat().format(total));
+  state = _objectSpread(_objectSpread({}, state), {}, {
+    total: total
+  });
+}
+
+function RemoveFeature() {
   var removeButtons = document.querySelectorAll('.remove-button');
   removeButtons.forEach(function (i) {
     i.addEventListener('click', function (e) {
@@ -190,9 +230,49 @@ function addRemoveFeature() {
 
       if (rowIndex > -1) {
         _domElements.default.table.deleteRow(rowIndex);
+
+        updateTotal();
+        var id = e.target.parentElement.parentElement.getAttribute('data-id'); // update state
+
+        var filteredMarkup = state.markUp.filter(function (row) {
+          return !row.includes("data-id=".concat(id));
+        });
+        state = _objectSpread(_objectSpread({}, state), {}, {
+          markUp: filteredMarkup
+        }); // update local storage state
+
+        localStorage.setItem('state', JSON.stringify(state));
       }
     });
   });
+}
+
+function renderState() {
+  if (appState && appState.markUp) {
+    appState.markUp.forEach(function (item) {
+      _domElements.default.tableBody.insertAdjacentHTML('beforeend', item);
+    });
+    _domElements.default.total.innerText = state.total;
+  }
+
+  RemoveFeature();
+  updateTotal();
+}
+
+function startApp() {
+  renderState();
+
+  if (appState) {
+    state = _objectSpread({}, appState);
+  }
+}
+
+function addError(el) {
+  el.parentElement.parentElement.classList.add('error');
+}
+
+function removeError(el) {
+  el.parentElement.parentElement.classList.remove('error');
 }
 
 _domElements.default.form.addEventListener('submit', function (e) {
@@ -201,14 +281,43 @@ _domElements.default.form.addEventListener('submit', function (e) {
       description = _domElements.default.description,
       amount = _domElements.default.amount;
   var Row = new _tableModel.default(type.value, description.value, amount.value);
-  Row.appendRow();
-  addRemoveFeature();
+
+  if (description.value === '') {
+    addError(description);
+  }
+
+  if (amount.value === '') {
+    addError(amount);
+  }
+
+  if (description.value === '' || amount.value === '') {
+    return;
+  }
+
+  if (amount.value !== '') {
+    removeError(amount);
+  }
+
+  if (description.value !== '') {
+    removeError(description);
+  }
+
+  Row.appendRow(state);
+  RemoveFeature();
+  description.value = '';
+  amount.value = '';
+  updateTotal();
+  saveLocalStorage(state);
 });
+
+startApp();
 },{"../view/dom-elements":"js/view/dom-elements.js","../model/table-model":"js/model/table-model.js"}],"js/index.js":[function(require,module,exports) {
 "use strict";
 
+require("./startApplication");
+
 require("./controller/form-controller");
-},{"./controller/form-controller":"js/controller/form-controller.js"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./startApplication":"js/startApplication.js","./controller/form-controller":"js/controller/form-controller.js"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -236,7 +345,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62105" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59258" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

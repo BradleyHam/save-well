@@ -5,4 +5,5 @@ export default {
   amount: document.getElementById('amount'),
   tableBody: document.getElementById('table-body'),
   table: document.getElementById('table'),
+  total: document.getElementById('total'),
 };

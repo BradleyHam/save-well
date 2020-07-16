@@ -7,6 +7,13 @@
 .relative{
     position: relative;
 }
-.submit-button, .row-button{
+.submit-button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+
+}
+
+.row-button{
     @include floatRightButton;
 }
