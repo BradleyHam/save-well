@@ -1,2 +1,2 @@
-import './startApplication';
+import './googleAuth';
 import './controller/form-controller';

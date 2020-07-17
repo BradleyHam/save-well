@@ -17,7 +17,6 @@ function updateTotal() {
 
   const total = amounts.reduce((acc, cur) => {
     const curNumber = +cur.replace(',', '').slice(3);
-    console.log(curNumber);
     if (cur.startsWith('+')) {
       return acc + curNumber;
     }
@@ -25,7 +24,6 @@ function updateTotal() {
   }, 0);
 
   elements.total.innerText = `$${new Intl.NumberFormat().format(total)}`;
-
   state = { ...state, total };
 }
 
@@ -61,13 +59,6 @@ function renderState() {
   updateTotal();
 }
 
-function startApp() {
-  renderState();
-  if (appState) {
-    state = { ...appState };
-  }
-}
-
 function addError(el) {
   el.parentElement.parentElement.classList.add('error');
 }
@@ -75,8 +66,7 @@ function removeError(el) {
   el.parentElement.parentElement.classList.remove('error');
 }
 
-elements.form.addEventListener('submit', (e) => {
-  e.preventDefault();
+function addItem() {
   const { type, description, amount } = elements;
   const Row = new TableRow(type.value, description.value, amount.value);
   if (description.value === '') {
@@ -106,6 +96,22 @@ elements.form.addEventListener('submit', (e) => {
 
   updateTotal();
   saveLocalStorage(state);
-});
+}
 
-startApp();
+//               START APP ------------------------
+export default function startApp(oauth) {
+  renderState();
+  if (appState) {
+    state = { ...appState };
+  }
+
+  elements.form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (oauth.isSignedIn.get()) {
+      addItem();
+    } else {
+      alert('please sign in');
+    }
+  });
+}
+//               START APP -----------------------

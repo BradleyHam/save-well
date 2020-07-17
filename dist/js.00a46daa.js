@@ -117,9 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"js/startApplication.js":[function(require,module,exports) {
-
-},{}],"js/view/dom-elements.js":[function(require,module,exports) {
+})({"js/view/dom-elements.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -133,7 +131,9 @@ var _default = {
   amount: document.getElementById('amount'),
   tableBody: document.getElementById('table-body'),
   table: document.getElementById('table'),
-  total: document.getElementById('total')
+  total: document.getElementById('total'),
+  login: document.getElementById('login'),
+  logout: document.getElementById('logout')
 };
 exports.default = _default;
 },{}],"js/model/table-model.js":[function(require,module,exports) {
@@ -180,6 +180,11 @@ exports.default = TableRow;
 },{"../view/dom-elements":"js/view/dom-elements.js"}],"js/controller/form-controller.js":[function(require,module,exports) {
 "use strict";
 
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = startApp;
+
 var _domElements = _interopRequireDefault(require("../view/dom-elements"));
 
 var _tableModel = _interopRequireDefault(require("../model/table-model"));
@@ -208,7 +213,6 @@ function updateTotal() {
   });
   var total = amounts.reduce(function (acc, cur) {
     var curNumber = +cur.replace(',', '').slice(3);
-    console.log(curNumber);
 
     if (cur.startsWith('+')) {
       return acc + curNumber;
@@ -259,14 +263,6 @@ function renderState() {
   updateTotal();
 }
 
-function startApp() {
-  renderState();
-
-  if (appState) {
-    state = _objectSpread({}, appState);
-  }
-}
-
 function addError(el) {
   el.parentElement.parentElement.classList.add('error');
 }
@@ -275,8 +271,7 @@ function removeError(el) {
   el.parentElement.parentElement.classList.remove('error');
 }
 
-_domElements.default.form.addEventListener('submit', function (e) {
-  e.preventDefault();
+function addItem() {
   var type = _domElements.default.type,
       description = _domElements.default.description,
       amount = _domElements.default.amount;
@@ -308,16 +303,77 @@ _domElements.default.form.addEventListener('submit', function (e) {
   amount.value = '';
   updateTotal();
   saveLocalStorage(state);
-});
+} //               START APP ------------------------
 
-startApp();
-},{"../view/dom-elements":"js/view/dom-elements.js","../model/table-model":"js/model/table-model.js"}],"js/index.js":[function(require,module,exports) {
+
+function startApp(oauth) {
+  renderState();
+
+  if (appState) {
+    state = _objectSpread({}, appState);
+  }
+
+  _domElements.default.form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (oauth.isSignedIn.get()) {
+      addItem();
+    } else {
+      alert('please sign in');
+    }
+  });
+} //               START APP -----------------------
+},{"../view/dom-elements":"js/view/dom-elements.js","../model/table-model":"js/model/table-model.js"}],"js/googleAuth.js":[function(require,module,exports) {
 "use strict";
 
-require("./startApplication");
+var _domElements = _interopRequireDefault(require("./view/dom-elements"));
+
+var _formController = _interopRequireDefault(require("./controller/form-controller"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var clientId = '52903164096-g27rl2a8tbbsutfeidohcj1cdgbqbj0d.apps.googleusercontent.com';
+
+function CheckSignedIn(signedIn) {
+  if (signedIn) {
+    _domElements.default.logout.style.display = 'block';
+    _domElements.default.login.style.display = 'none';
+  } else {
+    _domElements.default.login.style.display = 'block';
+    _domElements.default.logout.style.display = 'none';
+  }
+}
+
+window.gapi.load('client:auth2', function () {
+  window.gapi.client.init({
+    clientId: clientId,
+    scope: 'email'
+  }).then(function () {
+    var instance = window.gapi.auth2.getAuthInstance();
+    instance.signOut();
+    CheckSignedIn(instance.isSignedIn.get());
+
+    _domElements.default.login.addEventListener('click', function () {
+      instance.signIn();
+    });
+
+    _domElements.default.logout.addEventListener('click', function () {
+      instance.signOut();
+    });
+
+    instance.isSignedIn.listen(function (signedIn) {
+      CheckSignedIn(signedIn);
+    });
+    (0, _formController.default)(instance);
+  });
+});
+},{"./view/dom-elements":"js/view/dom-elements.js","./controller/form-controller":"js/controller/form-controller.js"}],"js/index.js":[function(require,module,exports) {
+"use strict";
+
+require("./googleAuth");
 
 require("./controller/form-controller");
-},{"./startApplication":"js/startApplication.js","./controller/form-controller":"js/controller/form-controller.js"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./googleAuth":"js/googleAuth.js","./controller/form-controller":"js/controller/form-controller.js"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -345,7 +401,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59258" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52941" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
