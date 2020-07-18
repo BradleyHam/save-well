@@ -8,4 +8,5 @@ export default {
   total: document.getElementById('total'),
   login: document.getElementById('login'),
   logout: document.getElementById('logout'),
+  user: document.getElementById('user'),
 };

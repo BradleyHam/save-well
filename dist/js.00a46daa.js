@@ -133,7 +133,8 @@ var _default = {
   table: document.getElementById('table'),
   total: document.getElementById('total'),
   login: document.getElementById('login'),
-  logout: document.getElementById('logout')
+  logout: document.getElementById('logout'),
+  user: document.getElementById('user')
 };
 exports.default = _default;
 },{}],"js/model/table-model.js":[function(require,module,exports) {
@@ -183,7 +184,12 @@ exports.default = TableRow;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.default = startApp;
+exports.renderState = renderState;
+exports.clearFields = clearFields;
+exports.showUser = showUser;
+exports.hideUser = hideUser;
+exports.updateUser = updateUser;
+exports.startApp = startApp;
 
 var _domElements = _interopRequireDefault(require("../view/dom-elements"));
 
@@ -197,13 +203,12 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
-var appState = JSON.parse(localStorage.getItem('state'));
 var state = {
   markUp: []
 };
 
 function saveLocalStorage(obj) {
-  localStorage.setItem('state', JSON.stringify(obj));
+  localStorage.setItem("".concat(state.user.Ea, " - ").concat(state.user.Qt.Bd), JSON.stringify(obj));
 }
 
 function updateTotal() {
@@ -226,7 +231,7 @@ function updateTotal() {
   });
 }
 
-function RemoveFeature() {
+function RemoveFeature(idString) {
   var removeButtons = document.querySelectorAll('.remove-button');
   removeButtons.forEach(function (i) {
     i.addEventListener('click', function (e) {
@@ -245,21 +250,19 @@ function RemoveFeature() {
           markUp: filteredMarkup
         }); // update local storage state
 
-        localStorage.setItem('state', JSON.stringify(state));
+        localStorage.setItem(idString, JSON.stringify(state));
       }
     });
   });
 }
 
-function renderState() {
-  if (appState && appState.markUp) {
-    appState.markUp.forEach(function (item) {
-      _domElements.default.tableBody.insertAdjacentHTML('beforeend', item);
-    });
-    _domElements.default.total.innerText = state.total;
-  }
-
-  RemoveFeature();
+function renderState(appState, idString) {
+  state = _objectSpread({}, appState);
+  appState.markUp.forEach(function (item) {
+    _domElements.default.tableBody.insertAdjacentHTML('beforeend', item);
+  });
+  _domElements.default.total.innerText = state.total;
+  RemoveFeature(idString);
   updateTotal();
 }
 
@@ -271,7 +274,12 @@ function removeError(el) {
   el.parentElement.parentElement.classList.remove('error');
 }
 
-function addItem() {
+function clearFields() {
+  _domElements.default.description.value = '';
+  _domElements.default.amount.value = '';
+}
+
+function addItem(idString) {
   var type = _domElements.default.type,
       description = _domElements.default.description,
       amount = _domElements.default.amount;
@@ -298,28 +306,60 @@ function addItem() {
   }
 
   Row.appendRow(state);
-  RemoveFeature();
-  description.value = '';
-  amount.value = '';
+  RemoveFeature(idString);
   updateTotal();
   saveLocalStorage(state);
+}
+
+function showUser() {
+  _domElements.default.user.innerText = "".concat(state.user.Qt.Bd, " - loged in");
+}
+
+function hideUser() {
+  _domElements.default.user.innerText = '';
+}
+
+function updateUser(oauth) {
+  state = _objectSpread(_objectSpread({}, state), {}, {
+    user: oauth.currentUser.get()
+  });
+  showUser();
 } //               START APP ------------------------
 
 
 function startApp(oauth) {
-  renderState();
+  if (oauth.isSignedIn.get('')) {
+    var _oauth$currentUser$ge = oauth.currentUser.get(),
+        id = _oauth$currentUser$ge.Ea,
+        name = _oauth$currentUser$ge.Qt.Bd;
 
-  if (appState) {
-    state = _objectSpread({}, appState);
+    var idString = "".concat(id, " - ").concat(name);
+    var appState = JSON.parse(localStorage.getItem(idString));
+
+    if (appState && appState.markUp) {
+      renderState(appState, idString);
+    }
+
+    state = _objectSpread(_objectSpread({}, state), {}, {
+      user: oauth.currentUser.get()
+    });
   }
 
   _domElements.default.form.addEventListener('submit', function (e) {
     e.preventDefault();
 
     if (oauth.isSignedIn.get()) {
-      addItem();
+      var _oauth$currentUser$ge2 = oauth.currentUser.get(),
+          _id = _oauth$currentUser$ge2.Ea,
+          _name = _oauth$currentUser$ge2.Qt.Bd;
+
+      var _idString = "".concat(_id, " - ").concat(_name);
+
+      addItem(_idString);
+      showUser();
     } else {
       alert('please sign in');
+      clearFields();
     }
   });
 } //               START APP -----------------------
@@ -328,7 +368,7 @@ function startApp(oauth) {
 
 var _domElements = _interopRequireDefault(require("./view/dom-elements"));
 
-var _formController = _interopRequireDefault(require("./controller/form-controller"));
+var _formController = require("./controller/form-controller");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -341,6 +381,9 @@ function CheckSignedIn(signedIn) {
   } else {
     _domElements.default.login.style.display = 'block';
     _domElements.default.logout.style.display = 'none';
+    (0, _formController.hideUser)();
+    _domElements.default.tableBody.innerHTML = '';
+    _domElements.default.total.innerText = '';
   }
 }
 
@@ -350,11 +393,15 @@ window.gapi.load('client:auth2', function () {
     scope: 'email'
   }).then(function () {
     var instance = window.gapi.auth2.getAuthInstance();
-    instance.signOut();
     CheckSignedIn(instance.isSignedIn.get());
 
     _domElements.default.login.addEventListener('click', function () {
-      instance.signIn();
+      instance.signIn().then(function () {
+        (0, _formController.updateUser)(instance);
+        (0, _formController.startApp)(instance);
+      }).catch(function (err) {
+        console.log(err);
+      });
     });
 
     _domElements.default.logout.addEventListener('click', function () {
@@ -362,9 +409,10 @@ window.gapi.load('client:auth2', function () {
     });
 
     instance.isSignedIn.listen(function (signedIn) {
+      (0, _formController.clearFields)();
       CheckSignedIn(signedIn);
     });
-    (0, _formController.default)(instance);
+    (0, _formController.startApp)(instance);
   });
 });
 },{"./view/dom-elements":"js/view/dom-elements.js","./controller/form-controller":"js/controller/form-controller.js"}],"js/index.js":[function(require,module,exports) {
@@ -401,7 +449,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52941" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60113" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

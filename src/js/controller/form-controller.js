@@ -1,14 +1,12 @@
 import elements from '../view/dom-elements';
 import TableRow from '../model/table-model';
 
-const appState = JSON.parse(localStorage.getItem('state'));
-
 let state = {
   markUp: [],
 };
 
 function saveLocalStorage(obj) {
-  localStorage.setItem('state', JSON.stringify(obj));
+  localStorage.setItem(`${state.user.Ea} - ${state.user.Qt.Bd}`, JSON.stringify(obj));
 }
 
 function updateTotal() {
@@ -27,7 +25,7 @@ function updateTotal() {
   state = { ...state, total };
 }
 
-function RemoveFeature() {
+function RemoveFeature(idString) {
   const removeButtons = document.querySelectorAll('.remove-button');
   removeButtons.forEach((i) => {
     i.addEventListener('click', (e) => {
@@ -42,20 +40,20 @@ function RemoveFeature() {
         state = { ...state, markUp: filteredMarkup };
 
         // update local storage state
-        localStorage.setItem('state', JSON.stringify(state));
+        localStorage.setItem(idString, JSON.stringify(state));
       }
     });
   });
 }
 
-function renderState() {
-  if (appState && appState.markUp) {
-    appState.markUp.forEach((item) => {
-      elements.tableBody.insertAdjacentHTML('beforeend', item);
-    });
-    elements.total.innerText = state.total;
-  }
-  RemoveFeature();
+export function renderState(appState, idString) {
+  state = { ...appState };
+  appState.markUp.forEach((item) => {
+    elements.tableBody.insertAdjacentHTML('beforeend', item);
+  });
+  elements.total.innerText = state.total;
+
+  RemoveFeature(idString);
   updateTotal();
 }
 
@@ -65,22 +63,24 @@ function addError(el) {
 function removeError(el) {
   el.parentElement.parentElement.classList.remove('error');
 }
+export function clearFields() {
+  elements.description.value = '';
+  elements.amount.value = '';
+}
 
-function addItem() {
+function addItem(idString) {
   const { type, description, amount } = elements;
   const Row = new TableRow(type.value, description.value, amount.value);
+
   if (description.value === '') {
     addError(description);
   }
-
   if (amount.value === '') {
     addError(amount);
   }
-
   if (description.value === '' || amount.value === '') {
     return;
   }
-
   if (amount.value !== '') {
     removeError(amount);
   }
@@ -89,29 +89,47 @@ function addItem() {
   }
 
   Row.appendRow(state);
-  RemoveFeature();
-
-  description.value = '';
-  amount.value = '';
-
+  RemoveFeature(idString);
   updateTotal();
   saveLocalStorage(state);
 }
 
-//               START APP ------------------------
-export default function startApp(oauth) {
-  renderState();
-  if (appState) {
-    state = { ...appState };
-  }
+export function showUser() {
+  elements.user.innerText = `${state.user.Qt.Bd} - loged in`;
+}
+export function hideUser() {
+  elements.user.innerText = '';
+}
 
+export function updateUser(oauth) {
+  state = { ...state, user: oauth.currentUser.get() };
+  showUser();
+}
+
+//               START APP ------------------------
+
+export function startApp(oauth) {
+  if (oauth.isSignedIn.get('')) {
+    const { Ea: id, Qt: { Bd: name } } = oauth.currentUser.get();
+    const idString = `${id} - ${name}`;
+    const appState = JSON.parse(localStorage.getItem(idString));
+    if (appState && appState.markUp) {
+      renderState(appState, idString);
+    }
+    state = { ...state, user: oauth.currentUser.get() };
+  }
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (oauth.isSignedIn.get()) {
-      addItem();
+      const { Ea: id, Qt: { Bd: name } } = oauth.currentUser.get();
+      const idString = `${id} - ${name}`;
+      addItem(idString);
+      showUser();
     } else {
       alert('please sign in');
+      clearFields();
     }
   });
 }
+
 //               START APP -----------------------

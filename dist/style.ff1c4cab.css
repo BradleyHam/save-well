@@ -4,7 +4,14 @@
 .submit-button {
   position: absolute;
   right: 10px;
-  top: 10px; }
+  top: 10px;
+  cursor: pointer; }
+
+#logout {
+  display: none; }
+
+.login {
+  cursor: pointer; }
 
 .row-button {
   position: absolute;

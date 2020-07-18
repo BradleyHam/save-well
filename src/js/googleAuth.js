@@ -1,5 +1,7 @@
 import elements from './view/dom-elements';
-import startApp from './controller/form-controller';
+import {
+  startApp, updateUser, hideUser, clearFields
+} from './controller/form-controller';
 
 const clientId = '52903164096-g27rl2a8tbbsutfeidohcj1cdgbqbj0d.apps.googleusercontent.com';
 
@@ -10,6 +12,9 @@ function CheckSignedIn(signedIn) {
   } else {
     elements.login.style.display = 'block';
     elements.logout.style.display = 'none';
+    hideUser();
+    elements.tableBody.innerHTML = '';
+    elements.total.innerText = '';
   }
 }
 
@@ -19,11 +24,11 @@ window.gapi.load('client:auth2', () => {
     scope: 'email',
   }).then(() => {
     const instance = window.gapi.auth2.getAuthInstance();
-    instance.signOut();
     CheckSignedIn(instance.isSignedIn.get());
-
     elements.login.addEventListener('click', () => {
-      instance.signIn();
+      instance.signIn()
+        .then(() => { updateUser(instance); startApp(instance); })
+        .catch((err) => { console.log(err); });
     });
 
     elements.logout.addEventListener('click', () => {
@@ -31,6 +36,7 @@ window.gapi.load('client:auth2', () => {
     });
 
     instance.isSignedIn.listen((signedIn) => {
+      clearFields();
       CheckSignedIn(signedIn);
     });
     startApp(instance);
