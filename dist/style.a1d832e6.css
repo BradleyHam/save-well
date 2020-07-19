@@ -1,0 +1,23 @@
+.relative {
+  position: relative; }
+
+.submit-button {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  cursor: pointer; }
+
+#logout {
+  display: none; }
+
+.login {
+  cursor: pointer; }
+
+.row-button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%); }
+
+
+/*# sourceMappingURL=/style.a1d832e6.css.map */

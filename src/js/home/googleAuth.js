@@ -1,7 +1,7 @@
-import elements from './view/dom-elements';
+import elements from '../dom-elements';
 import {
-  startApp, updateUser, hideUser, clearFields
-} from './controller/form-controller';
+  startApp, hideUser, clearFields,
+} from './form-controller';
 
 const clientId = '52903164096-g27rl2a8tbbsutfeidohcj1cdgbqbj0d.apps.googleusercontent.com';
 
@@ -27,7 +27,9 @@ window.gapi.load('client:auth2', () => {
     CheckSignedIn(instance.isSignedIn.get());
     elements.login.addEventListener('click', () => {
       instance.signIn()
-        .then(() => { updateUser(instance); startApp(instance); })
+        .then(() => {
+          startApp(instance);
+        })
         .catch((err) => { console.log(err); });
     });
 
@@ -39,6 +41,7 @@ window.gapi.load('client:auth2', () => {
       clearFields();
       CheckSignedIn(signedIn);
     });
+
     startApp(instance);
   });
 });

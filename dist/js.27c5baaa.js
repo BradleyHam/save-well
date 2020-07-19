@@ -117,7 +117,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"js/dom-elements.js":[function(require,module,exports) {
+})({"home/js/view/dom-elements.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -137,7 +137,7 @@ var _default = {
   user: document.getElementById('user')
 };
 exports.default = _default;
-},{}],"js/table-model.js":[function(require,module,exports) {
+},{}],"home/js/model/table-model.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -145,7 +145,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _domElements = _interopRequireDefault(require("./dom-elements"));
+var _domElements = _interopRequireDefault(require("../view/dom-elements"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -178,7 +178,7 @@ var TableRow = /*#__PURE__*/function () {
 }();
 
 exports.default = TableRow;
-},{"./dom-elements":"js/dom-elements.js"}],"js/form-controller.js":[function(require,module,exports) {
+},{"../view/dom-elements":"home/js/view/dom-elements.js"}],"home/js/controller/form-controller.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -191,9 +191,9 @@ exports.hideUser = hideUser;
 exports.updateUser = updateUser;
 exports.startApp = startApp;
 
-var _domElements = _interopRequireDefault(require("./dom-elements"));
+var _domElements = _interopRequireDefault(require("../view/dom-elements"));
 
-var _tableModel = _interopRequireDefault(require("./table-model"));
+var _tableModel = _interopRequireDefault(require("../model/table-model"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -363,12 +363,12 @@ function startApp(oauth) {
     }
   });
 } //               START APP -----------------------
-},{"./dom-elements":"js/dom-elements.js","./table-model":"js/table-model.js"}],"js/googleAuth.js":[function(require,module,exports) {
+},{"../view/dom-elements":"home/js/view/dom-elements.js","../model/table-model":"home/js/model/table-model.js"}],"home/js/googleAuth.js":[function(require,module,exports) {
 "use strict";
 
-var _domElements = _interopRequireDefault(require("./dom-elements"));
+var _domElements = _interopRequireDefault(require("./view/dom-elements"));
 
-var _formController = require("./form-controller");
+var _formController = require("./controller/form-controller");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -415,13 +415,13 @@ window.gapi.load('client:auth2', function () {
     (0, _formController.startApp)(instance);
   });
 });
-},{"./dom-elements":"js/dom-elements.js","./form-controller":"js/form-controller.js"}],"js/index.js":[function(require,module,exports) {
+},{"./view/dom-elements":"home/js/view/dom-elements.js","./controller/form-controller":"home/js/controller/form-controller.js"}],"home/js/index.js":[function(require,module,exports) {
 "use strict";
 
 require("./googleAuth");
 
-require("./form-controller");
-},{"./googleAuth":"js/googleAuth.js","./form-controller":"js/form-controller.js"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+require("./controller/form-controller");
+},{"./googleAuth":"home/js/googleAuth.js","./controller/form-controller":"home/js/controller/form-controller.js"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -449,7 +449,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60507" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "60340" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -625,5 +625,5 @@ function hmrAcceptRun(bundle, id) {
     return true;
   }
 }
-},{}]},{},["../node_modules/parcel/src/builtins/hmr-runtime.js","js/index.js"], null)
-//# sourceMappingURL=/js.00a46daa.js.map
+},{}]},{},["../node_modules/parcel/src/builtins/hmr-runtime.js","home/js/index.js"], null)
+//# sourceMappingURL=/js.27c5baaa.js.map

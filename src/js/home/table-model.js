@@ -1,4 +1,4 @@
-import elements from '../view/dom-elements';
+import elements from '../dom-elements';
 
 export default class TableRow {
   constructor(type, description, amount) {

@@ -1,5 +1,5 @@
-import elements from '../view/dom-elements';
-import TableRow from '../model/table-model';
+import elements from '../dom-elements';
+import TableRow from './table-model';
 
 let state = {
   markUp: [],
@@ -22,6 +22,7 @@ function updateTotal() {
   }, 0);
 
   elements.total.innerText = `$${new Intl.NumberFormat().format(total)}`;
+  elements.total.parentElement.className = total >= 0 ? 'ui statistic green' : 'ui statistic red';
   state = { ...state, total };
 }
 
@@ -95,7 +96,9 @@ function addItem(idString) {
 }
 
 export function showUser() {
-  elements.user.innerText = `${state.user.Qt.Bd} - loged in`;
+  if (state.user.Ea !== null) {
+    elements.user.innerText = `${state.user.Qt.Bd} - loged in`;
+  }
 }
 export function hideUser() {
   elements.user.innerText = '';
@@ -109,6 +112,7 @@ export function updateUser(oauth) {
 //               START APP ------------------------
 
 export function startApp(oauth) {
+  updateUser(oauth);
   if (oauth.isSignedIn.get('')) {
     const { Ea: id, Qt: { Bd: name } } = oauth.currentUser.get();
     const idString = `${id} - ${name}`;
@@ -126,8 +130,8 @@ export function startApp(oauth) {
       addItem(idString);
       showUser();
     } else {
-      alert('please sign in');
       clearFields();
+      alert('please sign in');
     }
   });
 }

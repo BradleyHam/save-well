@@ -9,4 +9,5 @@ export default {
   login: document.getElementById('login'),
   logout: document.getElementById('logout'),
   user: document.getElementById('user'),
+  activeLink: document.querySelector(`a[href^="/${window.location.pathname.split('/')[1]}"]`),
 };
